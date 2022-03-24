@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  The sample s3-bucket-policy-versioning project offers a serverless solution to version Amazon S3 bucket policies.
+
+Globals:
+  Function:
+    Timeout: 15
+    Handler: app.lambda_handler
+    Runtime: python3.9
+    Architectures:
+      - arm64
+    Environment:
+      Variables:
+        DDB_TABLE: !Ref BucketPolicyVersioningTable
+
+Resources:
+  RegisterBucketPolicyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: register_bucket_policy
+      Policies:
+        - Statement:
+            - Sid: WriteDDB
+              Effect: Allow
+              Action:
+                - dynamodb:PutItem
+              Resource:
+              - !GetAtt BucketPolicyVersioningTable.Arn
+      Events:
+        BucketPolicyVersioning:
+          Type: CloudWatchEvent
+          Properties:
+            Pattern:
+              source:
+                - aws.s3
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                - s3.amazonaws.com
+                eventName:
+                - PutBucketPolicy
+
+  RestoreBucketPolicyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: restore_bucket_policy
+      Policies:
+        - Statement:
+            - Sid: WriteDDB
+              Effect: Allow
+              Action:
+                - dynamodb:Query
+              Resource: !GetAtt BucketPolicyVersioningTable.Arn
+        - Statement:
+            - Sid: PutBucketPolicy
+              Effect: Allow
+              Action:
+                - s3:PutBucketPolicy
+              Resource: '*'
+
+  BucketPolicyVersioningTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "BucketName"
+          AttributeType: "S"
+        -
+          AttributeName: "Timestamp"
+          AttributeType: "S"
+        -
+          AttributeName: "BucketPolicyHash"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "BucketPolicyHash"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      GlobalSecondaryIndexes:
+        -
+          IndexName: "ByBucketName"
+          KeySchema:
+            -
+              AttributeName: "BucketName"
+              KeyType: "HASH"
+            -
+              AttributeName: "Timestamp"
+              KeyType: "RANGE"
+          Projection:
+            NonKeyAttributes:
+              - Issuer
+              - BucketPolicy
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput:
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+
+Outputs:
+  RegisterBucketPolicyFunction:
+    Description: "RegisterBucketPolicy Lambda Function ARN"
+    Value: !GetAtt RegisterBucketPolicyFunction.Arn
