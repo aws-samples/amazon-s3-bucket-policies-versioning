@@ -13,8 +13,8 @@ You can restore a previous version of a bucket policy by invoking an AWS Lambda 
 # Example of install using Python pip tool
 
     # Clone this repository and change directory into the project you just cloned
-    git clone therepositoryrl
-    cd s3-bucket-policy-versioning
+    git clone https://github.com/aws-samples/amazon-s3-bucket-policies-versioning.git
+    cd amazon-s3-bucket-policies-versioning
 
     # Create a virtual environment and activate it
     python -m venv venv
