@@ -10,7 +10,7 @@ You can restore a previous version of a bucket policy by invoking an AWS Lambda 
 - Because this is an [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/index.html) (Serverless Application Model) project, you will need to [install the sam cli.](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 - Install Docker
 
-# Example of install using Python pip tool
+# Example of install using Python pip
 
     # Clone this repository and change directory into the project you just cloned
     git clone https://github.com/aws-samples/amazon-s3-bucket-policies-versioning.git
