@@ -63,6 +63,7 @@ Resources:
   BucketPolicyVersioningTable:
     Type: AWS::DynamoDB::Table
     Properties:
+      BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         -
           AttributeName: "BucketName"
@@ -77,9 +78,6 @@ Resources:
         -
           AttributeName: "BucketPolicyHash"
           KeyType: "HASH"
-      ProvisionedThroughput:
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
       GlobalSecondaryIndexes:
         -
           IndexName: "ByBucketName"
@@ -95,9 +93,6 @@ Resources:
               - Issuer
               - BucketPolicy
             ProjectionType: "INCLUDE"
-          ProvisionedThroughput:
-            ReadCapacityUnits: "5"
-            WriteCapacityUnits: "5"
 
 Outputs:
   RegisterBucketPolicyFunction:
